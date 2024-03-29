@@ -1,0 +1,52 @@
+# Python Byte-compiled / optimized / DLL files
+*.py[cod]
+
+# C extensions
+*.so
+# Pycharm projects
+*.idea
+# Distribution / packaging
+# using this name meaningfully in AuthorGuides
+#build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+# C# ignore output folders
+bin/
+obj/
+ipch/
+packages/
+# ignore user-specific options/cache files
+_ReSharper.*
+Thumbs.db
+*.csproj.user
+*.opensdf
+*.[Rr]e[Ss]harper.user
+*.sdf
+*.sln.cache
+*.suo
+*.vcxproj.user
+*.DotSettings.user
+/scratch/
+.DS_Store
+*~
+site/
+.cache
+
+# project-specific
+# ignore luigi logging
+luigid/
+__pycache__/
+.pytest_cache
+/code/python/.ipynb_checkpoints/
+/.mypy_cache/
+*.env
+venv/
