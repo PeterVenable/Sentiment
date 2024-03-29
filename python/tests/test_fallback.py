@@ -1,10 +1,9 @@
 import time
 import unittest
 
-from fallback import FallBackSentimentClassifier
 from sentiment_classifier import SentimentClassifier, ClassifierServiceFailureError
-from huggingface import HuggingFaceSentimentClassifier
-from settings import settings
+from fallback import FallBackSentimentClassifier
+from setup import get_local_classifier
 
 
 class FailureTestClassifier(SentimentClassifier):
@@ -23,12 +22,6 @@ class FailureTestClassifier(SentimentClassifier):
 
 
 class FallbackClassifyTestCase(unittest.TestCase):
-    def setUp(self):
-        try:
-            kwargs = {"model": settings["model"]["name"]}
-        except (KeyError, TypeError):
-            kwargs = {}
-        self.classifier_kwargs = kwargs
 
     texts = [
         "I love this product",
@@ -43,8 +36,8 @@ class FallbackClassifyTestCase(unittest.TestCase):
     ]
 
     def test_fallback_no_delay(self):
-        primary = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
-        secondary = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
+        primary = get_local_classifier()
+        secondary = get_local_classifier()
         failure_client = FailureTestClassifier(primary)
         fallback = FallBackSentimentClassifier(primary=failure_client, secondary=secondary, retry_after=30)
         for text in self.texts:
@@ -56,8 +49,8 @@ class FallbackClassifyTestCase(unittest.TestCase):
         self.assertEqual(len(self.texts) - 2, secondary.count)
 
     def test_fallback_with_delay(self):
-        primary = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
-        secondary = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
+        primary = get_local_classifier()
+        secondary = get_local_classifier()
         failure_client = FailureTestClassifier(primary)
         delay = 0.5
         fallback = FallBackSentimentClassifier(

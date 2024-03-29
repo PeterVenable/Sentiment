@@ -3,13 +3,8 @@ import unittest
 
 class LocalModelClassifyTestCase(unittest.TestCase):
     def setUp(self):
-        from huggingface import HuggingFaceSentimentClassifier
-        from settings import settings
-        try:
-            kwargs = {"model": settings["model"]["name"]}
-        except (KeyError, TypeError):
-            kwargs = {}
-        self.classifier = HuggingFaceSentimentClassifier(**kwargs)
+        from setup import get_local_classifier
+        self.classifier = get_local_classifier()
 
     def _get_score(self, text: str) -> float:
         score = self.classifier.classify(text)

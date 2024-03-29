@@ -3,20 +3,8 @@ import unittest
 
 class ClientClassifyTestCase(unittest.TestCase):
     def setUp(self):
-        from settings import settings
-        import clients
-        client_settings = settings["client"]
-        class_name = client_settings["class"]
-        # import the class from the client module
-        klass = getattr(clients, class_name, None)
-        if not issubclass(klass, clients.GenericTextClassificationClient):
-            raise ValueError(f"Unsupported client: {class_name}")
-        self.client = klass(
-            url=client_settings["url"],
-            headers=client_settings["headers"],
-            method=client_settings["method"],
-            timeout=int(client_settings.get("timeout", 5)),
-        )
+        from setup import get_remote_client
+        self.client = get_remote_client()
 
     def _get_score(self, text: str) -> float:
         score = self.client.classify(text)
