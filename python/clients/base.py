@@ -1,7 +1,7 @@
 import requests
 from typing import Optional
 
-from sentiment_classifier import SentimentClassifier
+from sentiment_classifier import SentimentClassifier, ClassifierError, ClassifierServiceFailureError
 
 
 class GenericTextClassificationClient(SentimentClassifier):
@@ -28,7 +28,7 @@ class GenericTextClassificationClient(SentimentClassifier):
         if self._method not in ("get", "post"):
             raise ValueError(f"Unsupported method: {self._method}")
 
-    def classify(self, text: str) -> Optional[float]:
+    def classify(self, text: str) -> float:
         self.count += 1
         querystring = self.format_query(text)
         data = self._request(querystring)
@@ -36,7 +36,7 @@ class GenericTextClassificationClient(SentimentClassifier):
         if isinstance(score, int):
             score = float(score)
         elif not isinstance(score, float):
-            score = None
+            raise ClassifierError(f"Invalid score: {score}")
         return score
 
     def _request(self, data: object) -> dict:
@@ -48,6 +48,9 @@ class GenericTextClassificationClient(SentimentClassifier):
                 url=self._url, headers=self._headers, data=data, timeout=self._timeout)
         else:
             raise ValueError(f"Unsupported method: {self._method}")
+        if response.status_code != 200:
+            raise ClassifierServiceFailureError(
+                f"Classification request failed with HTTP status: {response.status_code}")
         return response.json()
 
     def format_query(self, text: str) -> object:

@@ -1,9 +1,19 @@
-from typing import Optional
-
 
 class ClassifierError(Exception):
     """
     An error occurred while classifying text.
+    """
+
+
+class InvalidTextError(ClassifierError):
+    """
+    The text for classification is invalid or not supported.
+    """
+
+
+class ClassifierServiceFailureError(ClassifierError):
+    """
+    A service error occurred while classifying text.
     """
 
 
@@ -16,10 +26,11 @@ class SentimentClassifier:
     def __init__(self):
         self.count = 0  # the number of times classify() has been called
 
-    def classify(self, text: str) -> Optional[float]:
+    def classify(self, text: str) -> float:
         """
         Classify text and return a sentiment score from -1 to 1.
         :param text: text to classify
-        :return: a sentiment score from -1.0 (most negative) to 1.0 (most positive) or None on failure
+        :return: a sentiment score from -1.0 (most negative) to 1.0 (most positive)
+        :raises ClassifierError: if an error occurs while classifying the text
         """
         raise NotImplementedError()

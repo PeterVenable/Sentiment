@@ -1,12 +1,10 @@
 import time
 import unittest
-from typing import Optional
 
 from fallback import FallBackSentimentClassifier
-from sentiment_classifier import SentimentClassifier
+from sentiment_classifier import SentimentClassifier, ClassifierServiceFailureError
 from huggingface import HuggingFaceSentimentClassifier
 from settings import settings
-import clients
 
 
 class FailureTestClassifier(SentimentClassifier):
@@ -14,32 +12,18 @@ class FailureTestClassifier(SentimentClassifier):
         super().__init__()
         self._classifier = classifier
 
-    def classify(self, text: str) -> Optional[float]:
+    def classify(self, text: str) -> float:
         case_ = self.count % 8
         self.count += 1
         if case_ == 2:
-            raise IOError("Test failure")
+            raise ClassifierServiceFailureError("Test failure")
         if case_ == 4:
-            return None
-        if case_ == 6:
-            raise TimeoutError("Test timeout")
+            raise ClassifierServiceFailureError("Test failure")
         return self._classifier.classify(text)
 
 
 class FallbackClassifyTestCase(unittest.TestCase):
     def setUp(self):
-        client_settings = settings["client"]
-        class_name = client_settings["class"]
-        # import the class from the client module
-        klass = getattr(clients, class_name, None)
-        if not issubclass(klass, clients.GenericTextClassificationClient):
-            raise ValueError(f"Unsupported client: {class_name}")
-        self.client = klass(
-            url=client_settings["url"],
-            headers=client_settings["headers"],
-            method=client_settings["method"],
-            timeout=int(client_settings.get("timeout", 5)),
-        )
         try:
             kwargs = {"model": settings["model"]["name"]}
         except (KeyError, TypeError):
@@ -59,26 +43,31 @@ class FallbackClassifyTestCase(unittest.TestCase):
     ]
 
     def test_fallback_no_delay(self):
-        classifier = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
-        failure_client = FailureTestClassifier(self.client)
-        fallback = FallBackSentimentClassifier(primary=failure_client, secondary=classifier)
+        primary = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
+        secondary = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
+        failure_client = FailureTestClassifier(primary)
+        fallback = FallBackSentimentClassifier(primary=failure_client, secondary=secondary, retry_after=30)
         for text in self.texts:
             score = fallback.classify(text)
             self.assertIsInstance(score, float)
-        self.assertEqual(fallback.failure_count_, 1)
-        self.assertEqual(failure_client.count, 3)
-        self.assertEqual(classifier.count, len(self.texts) - 2)
+        self.assertEqual(1, fallback.failure_count_)
+        self.assertEqual(3, failure_client.count)
+        self.assertEqual(2, primary.count)
+        self.assertEqual(len(self.texts) - 2, secondary.count)
 
     def test_fallback_with_delay(self):
-        classifier = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
-        failure_client = FailureTestClassifier(self.client)
+        primary = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
+        secondary = HuggingFaceSentimentClassifier(**self.classifier_kwargs)
+        failure_client = FailureTestClassifier(primary)
+        delay = 0.5
         fallback = FallBackSentimentClassifier(
-            primary=failure_client, secondary=classifier,
-            retry_after=1, increase_retry=1, max_wait=5)
+            primary=failure_client, secondary=secondary,
+            retry_after=delay, increase_retry=delay, max_wait=5*delay)
         for index, text in enumerate(self.texts):
             score = fallback.classify(text)
             self.assertIsInstance(score, float, msg=text)
-            time.sleep(1)
-        self.assertEqual(classifier.count, 5)
-        self.assertEqual(fallback.failure_count_, 3)
-        self.assertEqual(failure_client.count, len(self.texts) - 2)
+            time.sleep(delay)
+        self.assertEqual(3, secondary.count)
+        self.assertEqual(2, fallback.failure_count_)
+        self.assertEqual(len(self.texts) - 1, failure_client.count)
+        self.assertEqual(len(self.texts) - 3, primary.count)

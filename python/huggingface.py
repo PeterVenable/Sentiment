@@ -1,10 +1,11 @@
+import json
 import re
 
 from transformers import AutoModelForSequenceClassification
 from transformers import AutoTokenizer, AutoConfig
 from scipy.special import softmax
 
-from sentiment_classifier import SentimentClassifier
+from sentiment_classifier import SentimentClassifier, ClassifierError
 
 
 class HuggingFaceSentimentClassifier(SentimentClassifier):
@@ -60,8 +61,11 @@ class HuggingFaceSentimentClassifier(SentimentClassifier):
         Classify text and return a sentiment score from -1 to 1.
         :param text: text to classify
         :return: a sentiment score from -1.0 (most negative) to 1.0 (most positive)
+        :raises ClassifierError: if an error occurs while classifying the text
         """
         self.count += 1
         scores = self.classify_to_labels_(text)
         score = self.interpret_score_(scores)
+        if score is None:
+            raise ClassifierError(f"Unable to classify text using local model: {json.dumps(text)}")
         return score

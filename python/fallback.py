@@ -2,7 +2,7 @@ import logging
 from time import time
 from typing import Optional
 
-from sentiment_classifier import SentimentClassifier
+from sentiment_classifier import SentimentClassifier, ClassifierError, ClassifierServiceFailureError
 
 
 class FallBackSentimentClassifier(SentimentClassifier):
@@ -33,7 +33,7 @@ class FallBackSentimentClassifier(SentimentClassifier):
         self.next_retry_: Optional[float] = None
         self.failure_count_ = 0
 
-    def classify(self, text: str) -> Optional[float]:
+    def classify(self, text: str) -> float:
         """
         Classify text using the primary classifier, falling back to the secondary if the primary fails.
         :param text: the text string to classify
@@ -47,7 +47,7 @@ class FallBackSentimentClassifier(SentimentClassifier):
         if self.next_retry_ is None:
             try:
                 score = self.primary.classify(text)
-            except (IOError, TimeoutError):
+            except ClassifierServiceFailureError:
                 pass
             if score is None:
                 logging.warning("Primary classifier failed, falling back to secondary")
@@ -56,4 +56,6 @@ class FallBackSentimentClassifier(SentimentClassifier):
                 self.failure_count_ += 1
         if score is None:
             score = self.secondary.classify(text)
+            if score is None:
+                raise ClassifierError("Both classifiers failed")
         return score
