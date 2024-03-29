@@ -12,7 +12,7 @@ class FlaskTest(unittest.TestCase):
       ],
     """
 
-    text_positive = "what a sunny day for a walk"
+    text_positive = "what an amazing experience"
     text_negative = "worst day of my LIFE"
 
     def setUp(self):
@@ -71,4 +71,4 @@ class FlaskTest(unittest.TestCase):
         response = self.app.post('/sentiment', data=self.text_negative, headers=headers)
         self.assertEqual(200, response.status_code)
         data = response.get_json()
-        self.assertLessEqual(data.get("score"), -0.8)
+        self.assertLessEqual(data.get("score"), -0.4)

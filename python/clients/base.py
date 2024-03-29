@@ -39,7 +39,10 @@ class GenericTextClassificationClient(SentimentClassifier):
         if not text:
             raise InvalidTextError("Empty text")
         querystring = self.format_query(text)
-        data = self._request(querystring)
+        try:
+            data = self._request(querystring)
+        except OSError as e:
+            raise ClassifierServiceFailureError(e)
         score = self.extract_result(data)
         if isinstance(score, int):
             score = float(score)

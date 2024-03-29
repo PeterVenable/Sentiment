@@ -11,7 +11,7 @@
         "X-RapidAPI-Host": "twinword-sentiment-analysis.p.rapidapi.com"
     },
     "method": "post",
-    "timeout": 5
+    "timeout": 2
   },
   "fallback": {
     "retry_after": 10,
