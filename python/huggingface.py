@@ -5,7 +5,7 @@ from transformers import AutoModelForSequenceClassification
 from transformers import AutoTokenizer, AutoConfig
 from scipy.special import softmax
 
-from sentiment_classifier import SentimentClassifier, ClassifierError
+from sentiment_classifier import SentimentClassifier, ClassifierError, InvalidTextError
 
 
 class HuggingFaceSentimentClassifier(SentimentClassifier):
@@ -64,6 +64,8 @@ class HuggingFaceSentimentClassifier(SentimentClassifier):
         :raises ClassifierError: if an error occurs while classifying the text
         """
         self.count += 1
+        if not text:
+            raise InvalidTextError("Empty text")
         scores = self.classify_to_labels_(text)
         score = self.interpret_score_(scores)
         if score is None:

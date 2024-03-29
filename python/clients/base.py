@@ -1,7 +1,7 @@
 import requests
 from typing import Optional
 
-from sentiment_classifier import SentimentClassifier, ClassifierError, ClassifierServiceFailureError
+from sentiment_classifier import SentimentClassifier, ClassifierError, ClassifierServiceFailureError, InvalidTextError
 
 
 class GenericTextClassificationClient(SentimentClassifier):
@@ -30,6 +30,8 @@ class GenericTextClassificationClient(SentimentClassifier):
 
     def classify(self, text: str) -> float:
         self.count += 1
+        if not text:
+            raise InvalidTextError("Empty text")
         querystring = self.format_query(text)
         data = self._request(querystring)
         score = self.extract_result(data)

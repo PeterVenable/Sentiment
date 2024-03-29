@@ -1,8 +1,11 @@
 import json
 import logging
 
-from flask import Flask, request, Response
+from flask import Flask, request, jsonify
+
+from sentiment_classifier import ClassifierError
 from setup import get_fallback_classifier, configure_logging
+
 
 """
 set up the web server
@@ -21,12 +24,24 @@ def overview():
     <body>
     <h1>Sentiment API</h1>
     <p>This API provides sentiment analysis for text.</p>
+    <h2>/sentiment</h2>
+    <h3>Request</h3>
     <ul>
     <li>Endpoint: <code>/sentiment</code></li>
     <li>Method: <code>POST</code></li>
     <li>Body: text to classify</li>
     <li>MIME type: <code>text/plain</code></li>
-    <li>Response: `200` with sentiment score from -1.0 (most negative) to 1.0 (most positive)</li>
+    </ul>
+    <h3>Response</h3>
+    On success, the response is a `200` with a JSON object with the following fields:
+    <ul>
+    <li><code>score</code>: sentiment score from -1.0 (most negative) to 1.0 (most positive)</li>
+    <li><code>text</code>: the text that was classified</li>
+    </ul>
+    On error, the response is a non-`200` status code with a JSON object with the following fields:
+    <ul>
+    <li><code>error</code>: a description of the error</li>
+    <li><code>text</code>: the text that was not classified</li>
     </ul>
     </body>
     </html>"""
@@ -34,11 +49,24 @@ def overview():
 
 @app.post("/sentiment")
 def sentiment():
-    data = request.data.decode("utf-8")
-    if not data:
+    text = request.data.decode("utf-8")
+    error = ""
+    code = 200
+    score = 0.0
+    if not text:
         if request.mimetype != "text/plain":
-            return "Unsupported media type, please use: text/plain", 415
-        return "No data", 400
-    score = back_end.classify(data)
-    logging.info(f"classified {score:.3f} {json.dumps(data)}")
-    return Response(f"{score:.3f}", mimetype="text/plain")
+            error, code = "Unsupported media type, please use: text/plain", 415
+        else:
+            error, code = "No data", 400
+    if not error:
+        try:
+            score = back_end.classify(text)
+        except ClassifierError as e:
+            error, code = f"{e}", 400
+    if error:
+        logging.error(error)
+        result = {"error": error, "text": text}
+    else:
+        logging.info(f"classified {score:.3f} {json.dumps(text)}")
+        result = {"score": round(score, 5), "text": text}
+    return jsonify(result), code
