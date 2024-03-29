@@ -1,3 +1,10 @@
+"""
+WSGI config for sentiment project.
+
+To test locally, simply run `flask run` in the root directory of this project.
+To deploy to production, use your preferred WSGI server.
+"""
+
 import json
 import logging
 
@@ -16,7 +23,6 @@ app.config.update(
     MAX_CONTENT_LENGTH=4096,
 )
 back_end = get_fallback_classifier()
-back_end.classify("hello world")
 require_oauth = get_resource_protector()
 
 

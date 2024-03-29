@@ -1,3 +1,7 @@
+"""
+Setup: Uses settings to create common objects, such as classifiers and clients.
+"""
+
 from sentiment_classifier import SentimentClassifier
 
 
@@ -35,6 +39,7 @@ def get_fallback_classifier() -> SentimentClassifier:
     from settings import settings
     primary = get_remote_client()
     secondary = get_local_classifier()
+    secondary.classify("hello world")  # warm up the local classifier, which may require downloading a model
     fallback_settings = settings.get("fallback", {})
     kwargs = {
         k: v for k, v in fallback_settings.items()

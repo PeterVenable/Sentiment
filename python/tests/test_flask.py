@@ -3,6 +3,15 @@ import unittest
 
 class FlaskTest(unittest.TestCase):
 
+    """
+    Test the Flask app.
+    Assumes the "test" bearer token will be accepted, which can be ensured by including
+    the following in the settings.json file:
+      "tokens": [
+        {"client_id": "test", "access_token": "(ignored)"}
+      ],
+    """
+
     text_positive = "what a sunny day for a walk"
     text_negative = "worst day of my LIFE"
 

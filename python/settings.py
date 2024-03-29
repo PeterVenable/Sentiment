@@ -4,6 +4,10 @@ import os
 
 
 def load_settings(path="settings.json") -> dict:
+    """
+    Load the configuration settings from a JSON file.
+    The file is expected to be in the current working directory.
+    """
     try:
         with open(path, 'r') as f:
             return json.load(f)

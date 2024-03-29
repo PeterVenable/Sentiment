@@ -1,10 +1,16 @@
 import requests
 from typing import Optional
 
-from sentiment_classifier import SentimentClassifier, ClassifierError, ClassifierServiceFailureError, InvalidTextError
+from sentiment_classifier import (
+    SentimentClassifier, ClassifierError, ClassifierServiceFailureError, InvalidTextError)
 
 
 class GenericTextClassificationClient(SentimentClassifier):
+    """
+    Generic client for sentiment analysis services.
+    Use a subclass for a specific service, to correctly format the query and interpret the response.
+    Each subclass should override the format_query() and extract_result() methods.
+    """
     def __init__(self, *,
                  url: str,
                  headers: dict[str, str],
@@ -56,7 +62,17 @@ class GenericTextClassificationClient(SentimentClassifier):
         return response.json()
 
     def format_query(self, text: str) -> object:
+        """
+        Convert the text to a format suitable for the service.
+        :param text: the text to classify
+        :return: object or text suitable for the service API
+        """
         return {"text": text}
 
     def extract_result(self, data: dict) -> Optional[float]:
+        """
+        Extract the sentiment score from the service response.
+        :param data: JSON response from the service
+        :return: the score as a float, or None if not found
+        """
         return data.get("score")

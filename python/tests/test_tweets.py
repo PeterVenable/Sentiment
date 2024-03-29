@@ -4,6 +4,15 @@ import unittest
 
 class FlaskTest(unittest.TestCase):
 
+    """
+    This tests the app with a CSV file of tweets.
+    Only the "text" column of the CSV file is used.
+    The path to the CSV file is in settings.json under "test_csv", like this:
+    {
+        "test_csv": "path/to/Tweets.csv"
+    }
+    """
+
     def try_load_tweets(self, limit: int = 200) -> list[str]:
         from settings import settings
         tweets: list[str] = []
