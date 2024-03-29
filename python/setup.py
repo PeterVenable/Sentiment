@@ -41,3 +41,11 @@ def get_fallback_classifier() -> SentimentClassifier:
         if k in ("retry_after", "increase_retry", "max_wait") and isinstance(v, (int, float))
     } if isinstance(fallback_settings, dict) else {}
     return FallBackSentimentClassifier(primary=primary, secondary=secondary, **kwargs)
+
+
+def configure_logging():
+    from logging.config import dictConfig
+    from settings import settings
+    log_settings = settings.get("logging")
+    if log_settings:
+        dictConfig(log_settings)

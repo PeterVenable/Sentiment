@@ -12,5 +12,29 @@
     },
     "method": "post",
     "timeout": 5
+  },
+  "fallback": {
+    "retry_after": 10,
+    "increase_retry": 10,
+    "max_wait": 600
+  },
+  "logging": {
+    "version": 1,
+    "formatters": {
+      "default": {
+        "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+      }
+    },
+    "handlers": {
+      "wsgi": {
+        "class": "logging.StreamHandler",
+        "stream": "ext://flask.logging.wsgi_errors_stream",
+        "formatter": "default"
+      }
+    },
+    "root": {
+        "level": "INFO",
+        "handlers": ["wsgi"]
+    }
   }
 }
