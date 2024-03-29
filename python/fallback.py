@@ -1,5 +1,5 @@
 import logging
-from time import time
+import time
 from typing import Optional
 
 from sentiment_classifier import SentimentClassifier, ClassifierError, ClassifierServiceFailureError
@@ -41,7 +41,7 @@ class FallBackSentimentClassifier(SentimentClassifier):
         """
         self.count += 1
         score = None
-        if self.next_retry_ is not None and time() >= self.next_retry_:
+        if self.next_retry_ is not None and time.time() >= self.next_retry_:
             logging.info("Re-trying primary classifier after failure")
             self.next_retry_ = None
         if self.next_retry_ is None:
@@ -51,7 +51,7 @@ class FallBackSentimentClassifier(SentimentClassifier):
                 pass
             if score is None:
                 logging.warning("Primary classifier failed, falling back to secondary")
-                self.next_retry_ = time() + self.retry_after
+                self.next_retry_ = time.time() + self.retry_after
                 self.retry_after = min(self.retry_after + self.increase_retry, self.max_wait)
                 self.failure_count_ += 1
         if score is None:

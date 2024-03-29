@@ -8,6 +8,8 @@ transformers = "*"
 numpy = "*"
 torch = "*"
 flask = "*"
+authlib = "*"
+sqlalchemy = "*"
 
 [dev-packages]
 

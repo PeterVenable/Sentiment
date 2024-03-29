@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 
 from sentiment_classifier import ClassifierError
 from setup import get_fallback_classifier, configure_logging
-
+from authentication import get_resource_protector
 
 """
 set up the web server
@@ -16,6 +16,8 @@ app.config.update(
     MAX_CONTENT_LENGTH=4096,
 )
 back_end = get_fallback_classifier()
+back_end.classify("hello world")
+require_oauth = get_resource_protector()
 
 
 @app.route("/")
@@ -33,12 +35,12 @@ def overview():
     <li>MIME type: <code>text/plain</code></li>
     </ul>
     <h3>Response</h3>
-    On success, the response is a `200` with a JSON object with the following fields:
+    On success, the response is a <code>200</code> with a JSON object with the following fields:
     <ul>
-    <li><code>score</code>: sentiment score from -1.0 (most negative) to 1.0 (most positive)</li>
+    <li><code>score</code>: sentiment score from <code>-1.0</code> (most negative) to <code>1.0</code> (most positive)</li>
     <li><code>text</code>: the text that was classified</li>
     </ul>
-    On error, the response is a non-`200` status code with a JSON object with the following fields:
+    On error, the response is a non-<code>200</code> status code with a JSON object with the following fields:
     <ul>
     <li><code>error</code>: a description of the error</li>
     <li><code>text</code>: the text that was not classified</li>
@@ -48,6 +50,7 @@ def overview():
 
 
 @app.post("/sentiment")
+@require_oauth()
 def sentiment():
     text = request.data.decode("utf-8")
     error = ""

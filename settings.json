@@ -36,5 +36,8 @@
         "level": "INFO",
         "handlers": ["wsgi"]
     }
-  }
+  },
+  "tokens": [
+    {"client_id": "test", "access_token": "just for testing!"}
+  ]
 }
