@@ -39,5 +39,6 @@
   },
   "tokens": [
     {"client_id": "test", "access_token": "just for testing!"}
-  ]
+  ],
+  "test_csv": "data/Tweets.csv"
 }

@@ -70,6 +70,6 @@ def sentiment():
         logging.error(error)
         result = {"error": error, "text": text}
     else:
-        logging.info(f"classified {score:.3f} {json.dumps(text)}")
+        logging.info(f"classified {score:+.3f} {json.dumps(text)}")
         result = {"score": round(score, 5), "text": text}
     return jsonify(result), code
