@@ -1,10 +1,11 @@
+from typing import Optional
+
 from clients import GenericTextClassificationClient
 
 
 class TwinWordClient(GenericTextClassificationClient):
     """
     see https://rapidapi.com/twinword/api/sentiment-analysis/
-    The TwinWord API is compatible with the GenericTextClassificationClient, so no overrides are needed.
     """
     example_settings = {
         "class": "TwinWordClient",
@@ -17,3 +18,19 @@ class TwinWordClient(GenericTextClassificationClient):
         "method": "post",
         "timeout": 5
       }
+
+    def format_query(self, text: str) -> object:
+        """
+        Convert the text to a format suitable for the service.
+        :param text: the text to classify
+        :return: object or text suitable for the service API
+        """
+        return {"text": text}
+
+    def extract_result(self, data: dict) -> Optional[float]:
+        """
+        Extract the sentiment score from the service response.
+        :param data: JSON response from the service
+        :return: the score as a float, or None if not found
+        """
+        return data.get("score")

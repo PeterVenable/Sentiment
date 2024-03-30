@@ -70,7 +70,7 @@ class GenericTextClassificationClient(SentimentClassifier):
         :param text: the text to classify
         :return: object or text suitable for the service API
         """
-        return {"text": text}
+        raise NotImplementedError()
 
     def extract_result(self, data: dict) -> Optional[float]:
         """
@@ -78,4 +78,4 @@ class GenericTextClassificationClient(SentimentClassifier):
         :param data: JSON response from the service
         :return: the score as a float, or None if not found
         """
-        return data.get("score")
+        raise NotImplementedError()
