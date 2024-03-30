@@ -14,6 +14,7 @@ from sentiment_classifier import ClassifierError
 from setup import get_fallback_classifier, configure_logging
 from authentication import get_resource_protector
 
+
 """
 set up the web server
 """

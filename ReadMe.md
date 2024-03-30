@@ -6,6 +6,14 @@ It has just one simple endpoint, `/sentiment`, that accepts a POST request with 
 `text/plain` payload of text to analyze. It returns a JSON response with a `score` field
 containing a floating point number between -1 and 1.
 
+## Quick Start
+
+1. install Python 3.10
+2. clone this repository
+3. install the dependencies with `pipenv install`
+4. modify the `settings.json` file to include your third-party API credentials (optional)
+5. run the server with `pipenv run python -m flask run`
+
 ## Authentication
 
 The service is protected by a very simple Bearer authentication scheme. 
@@ -88,3 +96,4 @@ Response (200 OK)
 ```json
 {"score":0.9949,"text":"yes that's AWESOME"}
 ```
+
