@@ -1,6 +1,7 @@
 """
 Setup: Uses settings to create common objects, such as classifiers and clients.
 """
+import logging
 
 from sentiment_classifier import SentimentClassifier
 
@@ -11,11 +12,16 @@ def get_remote_client() -> SentimentClassifier:
     if "client" not in settings:
         raise ValueError("No client specified in settings")
     client_settings = settings["client"]
+    required_fields = {"class", "url", "headers", "method"}
+    if not required_fields <= set(client_settings.keys()):
+        raise ValueError(f"Client settings require: {' ,'.join(required_fields)}")
     class_name = client_settings["class"]
     # import the class from the client module
     klass = getattr(clients, class_name, None)
     if not issubclass(klass, clients.GenericTextClassificationClient):
         raise ValueError(f"Unsupported client: {class_name}")
+    if client_settings["headers"].get("X-RapidAPI-Key") == "YOUR_API_KEY":
+        logging.warning("API key not set in settings")
     return klass(
         url=client_settings["url"],
         headers=client_settings["headers"],
